@@ -119,9 +119,17 @@ func (r *Raft) appendEntries(req *pb.AppendEntriesRequest) (*pb.AppendEntriesRes
 		// Hint: use `getLog` to get log with ID equals to prevLogId
 		// Log: r.logger.Info("the given previous log from leader is missing or mismatched", zap.Uint64("prevLogId", prevLogId), zap.Uint64("prevLogTerm", prevLogTerm), zap.Uint64("logTerm", log.GetTerm()))
 		log := r.getLog(prevLogId)
+
 		if log.GetTerm() != prevLogTerm {
+			var oldestMatchedLogTermId uint64 = 0
+			for i := len(r.logs) - 1; i >= 0; i-- {
+				log = r.logs[i]
+				if log.GetTerm() == prevLogTerm {
+					oldestMatchedLogTermId = log.GetId()
+				}
+			}
 			r.logger.Info("the given previous log from leader is missing or mismatched", zap.Uint64("prevLogId", prevLogId), zap.Uint64("prevLogTerm", prevLogTerm), zap.Uint64("logTerm", log.GetTerm()))
-			return &pb.AppendEntriesResponse{Term: r.currentTerm, Success: false}, nil
+			return &pb.AppendEntriesResponse{Term: r.currentTerm, Success: false, OldestMatchedLogTermId: oldestMatchedLogTermId}, nil
 		}
 	}
 
@@ -519,9 +527,11 @@ func (r *Raft) handleAppendEntriesResult(result *appendEntriesResult) {
 		// TODO: (B.7) - if AppendEntries fails because of log inconsistency: decrement nextIndex and retry
 		// Hint: use `setNextAndMatchIndex` to decrement nextIndex
 		// Log: logger.Info("append entries failed, decrease next index", zap.Uint64("nextIndex", nextIndex), zap.Uint64("matchIndex", matchIndex))
-		nextIndex -= 1
+		oldestMatchedLogTermId := result.GetOldestMatchedLogTermId()
+		nextIndex = oldestMatchedLogTermId + 1
 		r.setNextAndMatchIndex(peerId, nextIndex, matchIndex)
 		r.logger.Info("append entries failed, decrease next index", zap.Uint64("nextIndex", nextIndex), zap.Uint64("matchIndex", matchIndex))
+		return
 	} else if len(entries) != 0 {
 		// TODO: (B.8) - if successful: update nextIndex and matchIndex for follower
 		// Hint: use `setNextAndMatchIndex` to update nextIndex and matchIndex
