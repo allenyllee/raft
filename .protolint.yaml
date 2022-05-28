@@ -1,0 +1,19 @@
+lint:
+  rules:
+    # no_default: true
+    all_default: true
+
+    # add:
+    #   - MESSAGE_NAMES_UPPER_CAMEL_CASE
+    #   - SERVICE_NAMES_UPPER_CAMEL_CASE
+
+    # The specific linters to remove.
+    remove:
+      - INDENT
+      - FILE_HAS_COMMENT
+      # - ENUM_FIELDS_HAVE_COMMENT
+      # - ENUMS_HAVE_COMMENT
+      - FIELDS_HAVE_COMMENT
+      - SERVICES_HAVE_COMMENT
+      - RPCS_HAVE_COMMENT
+      - MESSAGES_HAVE_COMMENT
