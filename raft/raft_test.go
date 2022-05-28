@@ -105,7 +105,7 @@ func TestSingleLogReplication(t *testing.T) {
 
 	for id := 1; id <= numNodes; id++ {
 		id := uint32(id)
-		c.checkLog(id, 1, leaderTerm, nil)
+		c.checkLog(id, 1, leaderTerm, data)
 	}
 }
 
