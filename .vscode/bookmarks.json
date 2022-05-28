@@ -1,0 +1,44 @@
+{
+	"files": [
+		{
+			"path": "raft/raft.go",
+			"bookmarks": [
+				{
+					"line": 35,
+					"column": 18,
+					"label": ""
+				},
+				{
+					"line": 121,
+					"column": 10,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "raft/rpc.go",
+			"bookmarks": [
+				{
+					"line": 101,
+					"column": 20,
+					"label": ""
+				},
+				{
+					"line": 106,
+					"column": 16,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "raft/cluster_test.go",
+			"bookmarks": [
+				{
+					"line": 119,
+					"column": 35,
+					"label": ""
+				}
+			]
+		}
+	]
+}
