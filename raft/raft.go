@@ -130,20 +130,20 @@ func (r *Raft) appendEntries(req *pb.AppendEntriesRequest) (*pb.AppendEntriesRes
 		// TODO: (B.4) - append any new entries not already in the log
 		// Hint: use `deleteLogs` follows by `appendLogs`
 		// Log: r.logger.Info("receive and append new entries", zap.Int("newEntries", len(req.GetEntries())), zap.Int("numberOfEntries", len(r.logs)))
+		last_log_id, _ := r.getLastLog()
 		for _, new_entry := range req.GetEntries() {
 			new_entry_id := new_entry.GetId()
-			existing_entry := r.getLog(new_entry_id)
+			existing_entry := (*pb.Entry)(nil)
+			if new_entry_id <= last_log_id {
+				existing_entry = r.getLog(new_entry_id)
+			}
 			if existing_entry != nil {
 				if new_entry.GetTerm() != existing_entry.GetTerm() {
 					r.deleteLogs(new_entry_id - 1)
+					r.appendLogs([]*pb.Entry{new_entry})
 				}
-			}
-		}
-
-		for _, entry := range req.GetEntries() {
-			existing_entry := r.getLog(entry.Id)
-			if existing_entry == nil {
-				r.appendLogs([]*pb.Entry{entry})
+			} else {
+				r.appendLogs([]*pb.Entry{new_entry})
 			}
 		}
 
@@ -500,8 +500,8 @@ func (r *Raft) handleAppendEntriesResult(result *appendEntriesResult) {
 		// TODO: (B.8) - if successful: update nextIndex and matchIndex for follower
 		// Hint: use `setNextAndMatchIndex` to update nextIndex and matchIndex
 		// Log: logger.Info("append entries successfully, set next index and match index", zap.Uint32("peer", result.peerId), zap.Uint64("nextIndex", nextIndex), zap.Uint64("matchIndex", matchIndex))
-		matchIndex = nextIndex
-		nextIndex += 1
+		matchIndex = entries[len(entries)-1].GetId()
+		nextIndex = matchIndex + 1
 		r.setNextAndMatchIndex(peerId, nextIndex, matchIndex)
 		r.logger.Info("append entries successfully, set next index and match index", zap.Uint32("peer", result.peerId), zap.Uint64("nextIndex", nextIndex), zap.Uint64("matchIndex", matchIndex))
 	}
